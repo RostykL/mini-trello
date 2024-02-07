@@ -33,8 +33,8 @@ const CardStack = ({
 
   return (
     <div className="flex-[0_0_350px]" ref={drop}>
-      <div className="w-full bg-gray-900 p-4 rounded-2xl text-white flex flex-col gap-4 shadow-xl">
-        <h1 className="font-bold tracking-wider text-gray-300 px-4">
+      <div className="w-full bg-gray-800 p-4 rounded text-white flex flex-col gap-2  shadow-xl">
+        <h1 className="font-bold tracking-wider text-gray-300 px-4 uppercase">
           {columnTitle}
         </h1>
         <div className="flex flex-col transition-all">
