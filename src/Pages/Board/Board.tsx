@@ -1,17 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import CardStack from "src/components/CardStack";
 import { DragItem, Item } from "src/types/Item.ts";
 import { CARDS } from "src/constants/cards.ts";
 
 const Board = () => {
   const [cards, setCards] = useState<Record<string, Item[]>>(CARDS);
-
-  // Delete from the current column
-  // Insert element on drop
-
-  useEffect(() => {
-    console.log(cards, "cards");
-  }, [cards]);
 
   const onCardStackDrop = (item: DragItem, moveToSection: string) => {
     // Note: don't allow to move item in the same section it was taken from
@@ -41,7 +34,6 @@ const Board = () => {
 
   const moveCard = useCallback(
     (isTop: boolean, item: DragItem, id: number, moveToSection: string) => {
-      // console.log(isTop, item, id, moveToSection);
       setCards((prevCards) => {
         const findHoverOverItem = prevCards[moveToSection].findIndex(
           (item) => item.id === id,
@@ -55,16 +47,19 @@ const Board = () => {
           return prevCards;
         }
 
-        const removeItem = prevCards[moveToSection].filter(
+        const removeItem = prevCards[item.currentColumnName].filter(
           (el) => el.id !== item.id,
         );
-        const start = removeItem.slice(0, sliceTillThisIndex);
+        const start = prevCards[moveToSection].slice(0, sliceTillThisIndex);
         const elementToInsert = item;
-        const end = removeItem.slice(sliceTillThisIndex);
+        const end = prevCards[moveToSection].slice(sliceTillThisIndex);
         const newArr = [...start, elementToInsert, ...end];
-        //   return prevCards;
 
-        return { ...prevCards, [moveToSection]: newArr };
+        return {
+          ...prevCards,
+          [moveToSection]: newArr,
+          [item.currentColumnName]: removeItem,
+        };
       });
     },
     [],

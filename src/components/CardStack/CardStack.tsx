@@ -26,7 +26,10 @@ const CardStack = ({
     },
   });
 
-  const canShowEditBlock = item?.currentColumnName !== columnTitle && isOver;
+  const canShowEditBlock =
+    item?.currentColumnName !== columnTitle &&
+    isOver &&
+    listOfCards.length === 0;
 
   return (
     <div className="flex-[0_0_350px]" ref={drop}>
