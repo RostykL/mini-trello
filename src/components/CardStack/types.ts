@@ -4,8 +4,9 @@ export interface CardStackProps {
   columnTitle: string;
   listOfCards: Item[];
   moveCard: (
-    dragIndex: number,
-    hoverIndex: number,
+    isTop: boolean,
+    item: DragItem,
+    id: number,
     currentColumnName: string,
   ) => void;
   onCardStackDrop: (item: DragItem, moveToSection: string) => void;

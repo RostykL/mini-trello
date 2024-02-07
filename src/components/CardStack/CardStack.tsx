@@ -26,8 +26,6 @@ const CardStack = ({
     },
   });
 
-  console.log(item, "items");
-
   const canShowEditBlock = item?.currentColumnName !== columnTitle && isOver;
 
   return (
@@ -36,7 +34,7 @@ const CardStack = ({
         <h1 className="font-bold tracking-wider text-gray-300 px-4">
           {columnTitle}
         </h1>
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col transition-all">
           {listOfCards.map((card) => (
             <Card
               key={card.id}
@@ -44,7 +42,6 @@ const CardStack = ({
               text={card.text}
               currentColumnName={columnTitle}
               moveCard={moveCard}
-              showPreview={(() => {}) as any}
             />
           ))}
           {canShowEditBlock ? (

@@ -15,13 +15,12 @@ const Board = () => {
 
   const onCardStackDrop = (item: DragItem, moveToSection: string) => {
     // Note: don't allow to move item in the same section it was taken from
-    if (item.currentColumnName === moveToSection) {
-      console.log(item, moveToSection, "blocked");
+    if (
+      item.currentColumnName === moveToSection ||
+      cards[moveToSection].length > 0
+    ) {
       return;
     }
-    console.log(item.currentColumnName, moveToSection);
-    // Note: remove item from the current column
-    // Append item to the new column
 
     setCards((prevCards) => {
       // Note: remove item from the section the item was taken from
@@ -41,24 +40,31 @@ const Board = () => {
   };
 
   const moveCard = useCallback(
-    (dragIndex: number, hoverIndex: number, section: "backlog" | "todo") => {
-      setCards((tmp) => {
-        // const removeDragElement = tmp[section].filter(
-        //   (el, i) => i !== dragIndex,
-        // );
-        // const prevCards = [...tmp[section]];
-        // console.log(prevCards, "prevCards");
-        // if (prevCards.length === 0) return tmp;
-        // const draggedCard = tmp[section][dragIndex];
-        //
-        // prevCards.splice(dragIndex, 1);
-        // // @ts-ignore
-        // prevCards.splice(hoverIndex, 0, { ...draggedCard, id });
+    (isTop: boolean, item: DragItem, id: number, moveToSection: string) => {
+      // console.log(isTop, item, id, moveToSection);
+      setCards((prevCards) => {
+        const findHoverOverItem = prevCards[moveToSection].findIndex(
+          (item) => item.id === id,
+        );
 
-        return {
-          ...tmp,
-          [section]: [],
-        };
+        const sliceTillThisIndex = isTop
+          ? findHoverOverItem
+          : findHoverOverItem + 1;
+
+        if (Number.isNaN(findHoverOverItem)) {
+          return prevCards;
+        }
+
+        const removeItem = prevCards[moveToSection].filter(
+          (el) => el.id !== item.id,
+        );
+        const start = removeItem.slice(0, sliceTillThisIndex);
+        const elementToInsert = item;
+        const end = removeItem.slice(sliceTillThisIndex);
+        const newArr = [...start, elementToInsert, ...end];
+        //   return prevCards;
+
+        return { ...prevCards, [moveToSection]: newArr };
       });
     },
     [],
@@ -72,7 +78,7 @@ const Board = () => {
             <CardStack
               listOfCards={cards}
               columnTitle={columnTitle}
-              moveCard={() => {}}
+              moveCard={moveCard}
               onCardStackDrop={onCardStackDrop}
             />
           );
