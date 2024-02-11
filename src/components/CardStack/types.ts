@@ -9,5 +9,6 @@ export interface CardStackProps {
     id: number,
     currentColumnName: string,
   ) => void;
+  setCards: React.Dispatch<React.SetStateAction<Record<string, Item[]>>>;
   onCardStackDrop: (item: DragItem, moveToSection: string) => void;
 }

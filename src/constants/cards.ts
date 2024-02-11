@@ -3,31 +3,38 @@ export const CARDS = {
   todo: [
     {
       id: 8,
-      text: "todo1",
+      text: "0",
+      dateOfCreation: 1733016240000,
     },
     {
       id: 9,
-      text: "Make it generic enough",
+      text: "1",
+      dateOfCreation: 1733102640000,
     },
     {
       id: 10,
-      text: "Write README",
+      text: "2",
+      dateOfCreation: 1733189040000,
     },
     {
       id: 11,
-      text: "Create some examples",
+      text: "3",
+      dateOfCreation: 1733275440000,
     },
     {
       id: 12,
-      text: "Spam in Twitter and IRC to promote it (note that this element is taller than the others)",
+      text: "4",
+      dateOfCreation: 1733361840000,
     },
     {
       id: 13,
-      text: "???",
+      text: "5",
+      dateOfCreation: 1733448240000,
     },
     {
       id: 14,
-      text: "PROFIT",
+      text: "6",
+      dateOfCreation: 1733534640000,
     },
   ],
 };

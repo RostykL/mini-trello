@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import CardStack from "src/components/CardStack";
 import { DragItem, Item } from "src/types/Item.ts";
 import { CARDS } from "src/constants/cards.ts";
+import { calculateIndex } from "src/shared/board/calculateIndex.ts";
 
 const Board = () => {
   const [cards, setCards] = useState<Record<string, Item[]>>(CARDS);
@@ -33,32 +34,65 @@ const Board = () => {
   };
 
   const moveCard = useCallback(
-    (isTop: boolean, item: DragItem, id: number, moveToSection: string) => {
+    (
+      isTopPosition: boolean,
+      item: DragItem,
+      hoverOverItemId: number,
+      moveToSection: string,
+    ) => {
+      const isColumnTheSame = item.currentColumnName === moveToSection;
+
       setCards((prevCards) => {
-        const findHoverOverItem = prevCards[moveToSection].findIndex(
-          (item) => item.id === id,
-        );
+        // Move dragged item to the same columns
+        if (isColumnTheSame) {
+          const currentColumn = [...prevCards[item.currentColumnName]];
+          // Remove dragged item from the column on drop
+          currentColumn.splice(item.index, 1);
 
-        const sliceTillThisIndex = isTop
-          ? findHoverOverItem
-          : findHoverOverItem + 1;
+          // User can put item above or below hovered element. Here we calculate the index.
+          const getIndexForPosition = calculateIndex(
+            isTopPosition,
+            currentColumn,
+            hoverOverItemId,
+          );
 
-        if (Number.isNaN(findHoverOverItem)) {
-          return prevCards;
+          currentColumn.splice(getIndexForPosition, 0, {
+            ...item,
+            index: getIndexForPosition,
+          });
+
+          return {
+            ...prevCards,
+            [item.currentColumnName]: currentColumn,
+          };
         }
 
-        const removeItem = prevCards[item.currentColumnName].filter(
-          (el) => el.id !== item.id,
-        );
-        const start = prevCards[moveToSection].slice(0, sliceTillThisIndex);
-        const elementToInsert = item;
-        const end = prevCards[moveToSection].slice(sliceTillThisIndex);
-        const newArr = [...start, elementToInsert, ...end];
+        // Move dragged item to another column
 
+        // 1. Remove dragged item from its initial column
+        const draggedItemColumn = [...prevCards[item.currentColumnName]];
+        draggedItemColumn.splice(item.index, 1);
+
+        // 2. Add new item to the new column
+        const newColumn = [...prevCards[moveToSection]];
+
+        // User can put item above or below hovered element. Here we calculate the index.
+        const getIndexForPosition = calculateIndex(
+          isTopPosition,
+          newColumn,
+          hoverOverItemId,
+        );
+
+        newColumn.splice(getIndexForPosition, 0, {
+          ...item,
+          index: getIndexForPosition,
+        });
+
+        // 3. Logic for adding to top or bottom should stay the same as above
         return {
           ...prevCards,
-          [moveToSection]: newArr,
-          [item.currentColumnName]: removeItem,
+          [item.currentColumnName]: draggedItemColumn,
+          [moveToSection]: newColumn,
         };
       });
     },
@@ -71,8 +105,10 @@ const Board = () => {
         {Object.entries(cards).map(([columnTitle, cards]) => {
           return (
             <CardStack
-              listOfCards={cards}
+              setCards={setCards}
               columnTitle={columnTitle}
+              key={columnTitle}
+              listOfCards={cards}
               moveCard={moveCard}
               onCardStackDrop={onCardStackDrop}
             />

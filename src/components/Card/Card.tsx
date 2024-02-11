@@ -1,76 +1,39 @@
-import { useDrag, useDrop } from "react-dnd";
-import { DNDTargetItems, DragItem } from "src/types/Item.ts";
 import { CardProps } from "src/components/Card/types.ts";
+import { useCardDrag } from "src/components/Card/hooks/useCardDrag.ts";
+import {
+  useCardBottomDrop,
+  useCardDrop,
+  useCardTopDrop,
+} from "src/components/Card/hooks/useCardDrop.ts";
 
-const Card = ({ text, id, moveCard, currentColumnName }: CardProps) => {
-  const [{ isDragging }, drag] = useDrag({
-    type: DNDTargetItems.TASK,
-    item: () => {
-      return { id, currentColumnName, text };
-    },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
+const Card = ({
+  text,
+  id,
+  moveCard,
+  currentColumnName,
+  dateOfCreation,
+  index,
+}: CardProps) => {
+  const [getStyles, , drag] = useCardDrag({
+    id,
+    currentColumnName,
+    dateOfCreation,
+    text,
+    index,
   });
 
-  const background = isDragging
-    ? "#a9acd4"
-    : "rgb(55 65 81 / var(--tw-bg-opacity))";
-  const textColor = isDragging ? "#a9acd4" : "white";
-  const border = isDragging ? "2px dashed coral" : "";
+  const [{ isHintOver, getItem }, hintRef] = useCardDrop();
 
-  const [{ isHintOver, getItem }, hintRef] = useDrop<
-    DragItem,
-    void,
-    { getItem: DragItem; isHintOver: boolean }
-  >({
-    accept: DNDTargetItems.TASK,
-    collect(monitor) {
-      return {
-        getItem: monitor.getItem(),
-        isHintOver: monitor.isOver(),
-      };
-    },
+  const [{ isOverTop }, refTop] = useCardTopDrop({
+    id,
+    currentColumnName,
+    moveCard,
   });
 
-  const [{ isOverTop }, refTop] = useDrop<
-    DragItem,
-    void,
-    { isOverTop: boolean; didDropTop: boolean }
-  >({
-    accept: DNDTargetItems.TASK,
-    collect(monitor) {
-      return {
-        isOverTop: monitor.isOver(),
-        didDropTop: monitor.isOver(),
-      };
-    },
-    drop(item) {
-      if (item.id === id) {
-        return;
-      }
-      moveCard(true, item, id, currentColumnName);
-    },
-  });
-
-  const [{ isOverBottom }, refBottom] = useDrop<
-    DragItem,
-    void,
-    { isOverBottom: boolean; didDropBottom: boolean }
-  >({
-    accept: DNDTargetItems.TASK,
-    collect(monitor) {
-      return {
-        isOverBottom: monitor.isOver(),
-        didDropBottom: monitor.didDrop(),
-      };
-    },
-    drop(item) {
-      if (item.id === id) {
-        return;
-      }
-      moveCard(false, item, id, currentColumnName);
-    },
+  const [{ isOverBottom }, refBottom] = useCardBottomDrop({
+    id,
+    currentColumnName,
+    moveCard,
   });
 
   const isAllowed = getItem?.id !== id && isHintOver;
@@ -81,15 +44,13 @@ const Card = ({ text, id, moveCard, currentColumnName }: CardProps) => {
       ref={hintRef}
     >
       <div
-        className={`transition-all ${isOverTop ? "outline-dashed" : "outline-solid"} ${isAllowed ? "py-4 opacity-1 duration-[400ms]" : "py-0 opacity-0 duration-[400ms]"} bg-gray-600 outline-1 rounded-md hover:outline`}
+        className={`transition-all ${isOverTop ? "outline-dashed py-6" : "outline-solid"} ${isAllowed ? "py-4 opacity-1 duration-[400ms]" : "py-0 opacity-0 duration-[400ms]"} bg-gray-600 outline-1 rounded-md hover:outline`}
         ref={refTop}
       />
       <div
         ref={drag}
         style={{
-          background,
-          color: textColor,
-          outline: border,
+          ...getStyles,
           transform: "translate(0,0)",
         }}
         className="transition-all bg-gray-700 rounded-md px-4 py-2"
@@ -97,7 +58,7 @@ const Card = ({ text, id, moveCard, currentColumnName }: CardProps) => {
         {text}
       </div>
       <div
-        className={`transition-all ${isOverBottom ? "outline-dashed" : "outline-solid"} ${isAllowed ? "py-4 opacity-1 duration-[400ms]" : "py-0 opacity-0 duration-[400ms]"} bg-gray-600 outline-1 rounded-md`}
+        className={`transition-all ${isOverBottom ? "outline-dashed py-6" : "outline-solid"} ${isAllowed ? "py-4 opacity-1 duration-[400ms]" : "py-0 opacity-0 duration-[400ms]"} bg-gray-600 outline-1 rounded-md`}
         ref={refBottom}
       />
     </div>

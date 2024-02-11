@@ -1,30 +1,30 @@
-import { useDrop } from "react-dnd";
 import Card from "src/components/Card";
-import { DNDTargetItems, DragItem } from "src/types/Item.ts";
 import { CardStackProps } from "src/components/CardStack/types.ts";
+import { useState } from "react";
+import { useCardStackDrop } from "src/components/CardStack/hooks/useCardStackDrop.ts";
+import { orderBy as LodashOrderBy } from "lodash";
+
+export enum SortTypes {
+  ASC = "asc",
+  DESC = "desc",
+}
+
+const isSortTypeAsc = (type: SortTypes) => SortTypes.ASC === type;
 
 const CardStack = ({
   columnTitle,
   listOfCards,
   moveCard,
   onCardStackDrop,
+  setCards,
 }: CardStackProps) => {
-  const [{ isOver, item }, drop] = useDrop<
-    DragItem,
-    void,
-    { isOver: boolean; item: DragItem }
-  >({
-    accept: DNDTargetItems.TASK,
-    drop(item) {
+  const [{ isOver, item }, drop] = useCardStackDrop({
+    onDrop(item) {
       onCardStackDrop(item, columnTitle);
     },
-    collect(monitor) {
-      return {
-        isOver: monitor.isOver(),
-        item: monitor.getItem(),
-      };
-    },
   });
+
+  const [orderBy, setOrderBy] = useState<SortTypes>(SortTypes.ASC);
 
   const canShowEditBlock =
     item?.currentColumnName !== columnTitle &&
@@ -34,13 +34,40 @@ const CardStack = ({
   return (
     <div className="flex-[0_0_350px]" ref={drop}>
       <div className="w-full bg-gray-800 p-4 rounded text-white flex flex-col gap-2  shadow-xl">
-        <h1 className="font-bold tracking-wider text-gray-300 px-4 uppercase">
-          {columnTitle}
-        </h1>
+        <div className="flex justify-between">
+          <h1 className="font-bold tracking-wider text-gray-300 px-4 uppercase">
+            {columnTitle}
+          </h1>
+          <div className="font-light">
+            sort date
+            <span
+              className="text-blue-400 underline lowercase cursor-pointer"
+              onClick={() => {
+                setOrderBy(
+                  isSortTypeAsc(orderBy) ? SortTypes.DESC : SortTypes.ASC,
+                );
+                setCards((prevCards) => {
+                  return {
+                    ...prevCards,
+                    [columnTitle]: LodashOrderBy(
+                      prevCards[columnTitle],
+                      ["dateOfCreation"],
+                      isSortTypeAsc(orderBy) ? SortTypes.DESC : SortTypes.ASC,
+                    ),
+                  };
+                });
+              }}
+            >
+              (current:{orderBy})
+            </span>
+          </div>
+        </div>
         <div className="flex flex-col transition-all">
-          {listOfCards.map((card) => (
+          {listOfCards.map((card, index) => (
             <Card
               key={card.id}
+              dateOfCreation={card.dateOfCreation}
+              index={index}
               id={card.id}
               text={card.text}
               currentColumnName={columnTitle}

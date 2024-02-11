@@ -1,11 +1,13 @@
 export interface Item {
+  dateOfCreation: number;
   id: number;
   text: string;
+  index?: number;
 }
 
-export interface DragItem {
+export interface DragItem extends Item {
   id: number;
-  text: string;
+  index: number;
   currentColumnName: string;
 }
 
